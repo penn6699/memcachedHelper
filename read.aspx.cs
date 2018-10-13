@@ -11,15 +11,15 @@ public partial class read : System.Web.UI.Page
     {
         if (!IsPostBack)
         {
-            MemcachedHelper mch = new MemcachedHelper();
+            
 
             string key = Request["key"] ?? "a";
            
             Response.Write(string.Format("key:{0}<br/>", key));
             
-            Response.Write(mch.Get(key));
+            Response.Write(MemcachedHelper.Get(key));
             Response.Write("<br/>");
-            Response.Write(mch.Get<string>(key + "test"));
+            Response.Write(MemcachedHelper.Get(key + "test"));
         }
 
     }

@@ -12,10 +12,16 @@ using System.Web;
 public class MemcachedHelper
 {
     
-    private MemcachedClient mc;
+    private static MemcachedClient _MemcachedClient;
+    //static readonly object locker = new object();
 
-    public MemcachedHelper() {
-        mc = new MemcachedClient();
+    private static MemcachedClient Client {
+        get {
+            if (_MemcachedClient == null) {
+                _MemcachedClient = new MemcachedClient();
+            }
+            return _MemcachedClient;
+        }
     }
 
     /// <summary>
@@ -25,27 +31,36 @@ public class MemcachedHelper
     /// <param name="value">键值</param>
     /// <param name="expires">有效时间。单位是分钟</param>
     /// <returns></returns>
-    public bool Set(string key,object value, int? expires = null) {
+    public static bool Set(string key,object value, int? expires = null) {
         
         Debug.WriteLine(key);
         if (expires == null || expires < 1)
         {
-            return mc.Store(StoreMode.Set, key, value);
+            return Client.Store(StoreMode.Set, key, value);
         }
         else
         {
-            return mc.Store(StoreMode.Set, key, value, DateTime.Now.AddMinutes((double)expires));
+            int totalSeconds = 60 * (int)expires;
+
+            if (totalSeconds> 2592000)  //当配置文件设置为0时，表示保存最大天数30天。
+            {
+                totalSeconds = 2592000;
+            }
+
+            TimeSpan ts = new TimeSpan(0, 0, totalSeconds);           
+            return Client.Store(StoreMode.Set, key, value,ts);
+            
         }
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    public object Get(string key) 
+    public static object Get(string key) 
     {
-        return mc.Get(key);
+        return Client.Get(key);
     }
 
     /// <summary>
@@ -54,25 +69,25 @@ public class MemcachedHelper
     /// <typeparam name="T"></typeparam>
     /// <param name="key"></param>
     /// <returns></returns>
-    public T Get<T>(string key) where T : class
+    public static T Get<T>(string key) where T : class
     {
-        return mc.Get<T>(key);
+        return Client.Get<T>(key);
     }
 
-    public IDictionary<string,object> Get(List<string> keys)
+    public static IDictionary<string,object> Get(List<string> keys)
     {
-        return mc.Get(keys);
+        return Client.Get(keys);
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    public bool IsExist(string key) {
-        //return mc.Get(key) != null;//memcache不允许将值设置null
+    public static bool IsExist(string key) {
+        //return Client.Get(key) != null;//memcache不允许将值设置null
         object obj;
-        return mc.TryGet(key, out obj);
+        return Client.TryGet(key, out obj);
     }
 
     /// <summary>
@@ -80,17 +95,17 @@ public class MemcachedHelper
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    public bool Remove(string key)
+    public static bool Remove(string key)
     {
-        return mc.Remove(key);
+        return Client.Remove(key);
     }
 
 
     /// <summary>
     /// 清空所有缓存
     /// </summary>
-    public void Clear() {
-        mc.FlushAll();
+    public static void Clear() {
+        Client.FlushAll();
     }
 
 
