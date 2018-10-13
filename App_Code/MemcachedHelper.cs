@@ -3,8 +3,9 @@ using Enyim.Caching.Memcached;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Web;
+
+
+//EnyimMemcached
 
 /// <summary>
 /// MemCached缓存处理
