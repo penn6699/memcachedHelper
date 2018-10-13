@@ -25,7 +25,7 @@ public partial class _Default : System.Web.UI.Page
             if (MemcachedHelper.Set(key + "test", value+ "_test", 3))
                 Response.Write("保存成功2<br/>");
             Response.Write(MemcachedHelper.Get(key + "test"));
-            Response.Write("保存成功2<br/>"+DateTime.Now.ToString("yyyyMMdd HH:mm:ss"));
+            Response.Write("<br/>"+DateTime.Now.ToString("yyyyMMdd HH:mm:ss"));
         }
     }
 }
